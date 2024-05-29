@@ -32,14 +32,15 @@ app.use(cookieParser());
 
 // routes import
 import userRouter from './routers/user.routes.js'
-import ticketRouter from './routers/ticket.routers.js'
+// import ticketRouter from './routers/ticket.routers.js'
+import todoRouter from './routers/todo.routers.js'
 
 
 //user routes declaration
 app.use("/api/v1/users", userRouter)
 
-// user ticket router declaration
-app.use("/api/v1/tickets", ticketRouter)
+// todos routes declaration
+app.use("/api/v1/todos", todoRouter)
 
 
 

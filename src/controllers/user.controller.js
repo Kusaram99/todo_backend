@@ -207,19 +207,11 @@ const userLogout = asyncHandler(async (req, res, next) => {
 
 // refresh token
 const refreshAccessToken = asyncHandler(async (req, res, next) => {
-    // get refresh token from cookies || req.header("Authorization")
-    // check refresh token is existed or not
-    // check refresh token is valide or not
-    // if refresh token is valide, then generate access and refresh token and send cookies
-    // send response 
-
+    // access kockies
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken?.split(" ")[1];
-    // const incomingRefreshToken = req.body?.refreshToken?.split(" ")[1];
-
-
     console.log("incomingRefreshToken: ", incomingRefreshToken);
     if (!incomingRefreshToken) {
-        throw new ApiError(403, "Refresh token is required");
+        throw new ApiError(401, "Refresh token is required");
     }
     try {
         // verify refresh token
@@ -228,21 +220,21 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
         console.log("decodedToken: ", decodedToken);
         // check refresh token is existed or not
         if (!decodedToken) {
-            throw new ApiError(403, "Something is wrong with refresh token");
+            throw new ApiError(402, "Something is wrong with refresh token");
         }
 
-        // console.log("decodedToken: ", decodedToken);
+        console.log("decodedToken: ", decodedToken);
         // check user
         const user = await User.findById(decodedToken?._id);
 
         // is user existed or not
         if (!user) {
-            throw new ApiError(403, "Invalid Refresh Token");
+            throw new ApiError(402, "Invalid Refresh Token");
         }
 
         // check is refresh token expired or not
         if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Refresh token is expired or used")
+            throw new ApiError(402, "Invalid Refresh Token");
 
         }
 
@@ -270,8 +262,8 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
             )
 
     } catch (error) {
-        console.log("error: ", error.message);
-        throw new ApiError(403, "Server Error")
+        console.log("error------: ", error.message);
+        throw new ApiError(401, error?.message || "Server Error")
     }
 })
 
