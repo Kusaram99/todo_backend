@@ -3,7 +3,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { response } from "express";
 
 
 // add todo to database
@@ -19,7 +18,7 @@ const addTodo = asyncHandler(async (req, res) => {
     try {
         const { title, textarea, userId } = req.body;
 
-        console.log("body: ", req.body)
+        // console.log("body--: ", req.body)
 
         // return res.send("todo added")
 
@@ -42,13 +41,82 @@ const addTodo = asyncHandler(async (req, res) => {
         res.status(200).json(new ApiResponse(200, todo, "Todo added successfully"))
     }
     catch (error) {
-        console.log("adding-error: ", error);
+        // console.log("adding-error: ", error);
         throw new ApiError(401, error?.message || "Server Error")
+    }
+})
+
+// delet todo 
+const deleteTodo = asyncHandler(async (req, res) => {
+    // check user is loged
+    // if no throw error
+    // If yes delete todo
+    // ṭhen return deleted todo data 
+    // as response
+    const { _id } = req.params;
+    try {
+        // delete todo
+        const result = await Todo.findByIdAndDelete(_id)
+        // if not deleted
+        console.log("Todo deleted successfully:- ", result)
+        if (!result) {
+            throw new ApiError(500, "Request failed!");
+        }
+        // if successfully deleted
+        res.status(200)
+            .json(new ApiResponse(200, result, "Successfully deleted"))
+
+    } catch (error) {
+        throw new ApiError(401, error.message || "Server Error");
+    }
+})
+
+// update todo
+const updateTodo = asyncHandler(async (req, res) => {
+    try {
+
+        // extract data
+        const { title, textarea, todoId } = req.body;
+        console.log("update: ", req.body);
+
+        // update the todo
+        const result = await Todo.findByIdAndUpdate(todoId, { title, textarea }, { new: true });
+
+        // check is todo updated
+        if (!result) {
+            throw new ApiError(401, "Server Error !");
+        }
+
+        res.status(200).json(new ApiResponse(200, result, "Successfully updated"));
+
+
+    } catch (error) {
+        throw new ApiError(401, error.message || "Server error");
+    }
+})
+
+const getUserTodos = asyncHandler(async (req, res) => {
+    // console.log("get user: ", req.params);
+
+    try {
+
+        const { _id } = req.params;
+
+        // get user todos documents 
+        const result = await Todo.find({ userId: _id });
+        if (!result.length) {
+            throw new ApiError(401, "User don't have andy todo!");
+        }
+
+        res.status(200).json(new ApiResponse(200, { result }, "Successfully completed"));
+
+    } catch (error) {
+        console.log("errr: ", error.message)
+        throw new ApiError(401, error.message || "Server Error!")
     }
 })
 
 
 
 
-
-export { addTodo }
+export { addTodo, deleteTodo, updateTodo, getUserTodos }

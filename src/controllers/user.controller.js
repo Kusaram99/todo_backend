@@ -35,6 +35,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
         // console.log("body: ------- ", Array.isArray(req.files?.avatar));
         const { username, fullName, email, password } = req.body
 
+        console.log("req. body: ", req.body)
 
         // check is user data empty
         if ([username, fullName, email, password].some(v => v?.trim() === "")) {
@@ -91,27 +92,20 @@ const registerUser = asyncHandler(async (req, res, next) => {
                     200,
                     {
                         user: signedUser,
-                        accessToken,
-                        refreshToken
+                        refreshToken,
+                        accessToken
                     },
                     "User Signed successfully"
                 )
             )
     } catch (err) {
         console.log("err: ", err);
-        throw new ApiError(501, "Server Error")
+        throw new ApiError(501, err.message || "Server Error")
     }
 })
 
 // login user
-const loginUser = asyncHandler(async (req, res, next) => {
-    // 1. extract email and password from request body 
-    // 2. username and email
-    // 3. find the user
-    // 4. check password
-    // 5. access and refresh token
-    // 6. send cookies
-
+const loginUser = asyncHandler(async (req, res) => {
     try {
         const { email, password } = req.body
 
@@ -171,12 +165,13 @@ const loginUser = asyncHandler(async (req, res, next) => {
             )
     } catch (error) {
         console.log("error: ", error);
-        throw new ApiError(401, "Server Error")
+        throw new ApiError(401, error.message || "Server Error")
     }
 })
 
 // logout user
 const userLogout = asyncHandler(async (req, res, next) => {
+    console.log("logOute: ", req.user)
     try {
         await User.findByIdAndUpdate(
             req.user._id,
@@ -190,14 +185,14 @@ const userLogout = asyncHandler(async (req, res, next) => {
             }
         )
 
-        const opitions = {
+        const options = {
             httpOnly: true,
             secure: true
         }
 
         res.status(200)
-            .clearCookie("accessToken", opitions)
-            .clearCookie("refreshToken", opitions)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
             .json(new ApiResponse(200, {}, "User logged out successfully"))
     } catch (error) {
         console.log("error: ", error);
@@ -209,7 +204,7 @@ const userLogout = asyncHandler(async (req, res, next) => {
 const refreshAccessToken = asyncHandler(async (req, res, next) => {
     // access kockies
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken?.split(" ")[1];
-    console.log("incomingRefreshToken: ", incomingRefreshToken);
+    // console.log("incomingRefreshToken: ", incomingRefreshToken);
     if (!incomingRefreshToken) {
         throw new ApiError(401, "Refresh token is required");
     }
@@ -217,10 +212,10 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
         // verify refresh token
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-        console.log("decodedToken: ", decodedToken);
+        // console.log("decodedToken: ", decodedToken);
         // check refresh token is existed or not
         if (!decodedToken) {
-            throw new ApiError(402, "Something is wrong with refresh token");
+            throw new ApiError(401, "Refresh token is expired!");
         }
 
         console.log("decodedToken: ", decodedToken);
@@ -229,12 +224,12 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
 
         // is user existed or not
         if (!user) {
-            throw new ApiError(402, "Invalid Refresh Token");
+            throw new ApiError(401, "Invalid Refresh Token");
         }
 
         // check is refresh token expired or not
         if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(402, "Invalid Refresh Token");
+            throw new ApiError(401, "Invalid Refresh Token, Something is wrong!");
 
         }
 

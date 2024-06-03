@@ -15,7 +15,7 @@ app.use(cors({
 
 // Use the JSON middleware to parse incoming JSON requests
 // The limit option restricts the size of the JSON payload to 16kb
-app.use(express.json({ limit: "16kb" }));
+app.use(express.json({ limit: "5mb" }));
 
 // Use the URL-encoded middleware to parse incoming URL-encoded requests
 // extended: true allows for rich objects and arrays to be encoded into the URL-encoded format
