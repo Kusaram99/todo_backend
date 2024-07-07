@@ -30,12 +30,8 @@ const generateAccessAndRefereshTokens = async (userId) => {
 
 // register user
 const registerUser = asyncHandler(async (req, res, next) => {
-    try {
-        // console.log("body: ------- ", req.files?.avatar);
-        // console.log("body: ------- ", Array.isArray(req.files?.avatar));
-        const { username, fullName, email, password } = req.body
-
-        console.log("req. body: ", req.body)
+    try { 
+        const { username, fullName, email, password } = req.body 
 
         // check is user data empty
         if ([username, fullName, email, password].some(v => v?.trim() === "")) {
@@ -69,12 +65,6 @@ const registerUser = asyncHandler(async (req, res, next) => {
             avatar: avatarUrl?.url || ""
         })
 
-        // const createdUser = await User.findById(user._id).select("-password");
-
-        // send response 
-        // res.status(201).json(new ApiResponse(200, createdUser, "User created successfully"))
-
-        // generate access token and refresh token
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
         const signedUser = await User.findById(user._id).select("-password -refreshToken");
 
@@ -115,9 +105,7 @@ const loginUser = asyncHandler(async (req, res) => {
         }
 
         // find the user
-        const user = await User.findOne({ email });
-
-        // console.log("user: ", user);
+        const user = await User.findOne({ email }); 
 
         // check user is existed or not
         if (!user) {
@@ -125,9 +113,7 @@ const loginUser = asyncHandler(async (req, res) => {
         }
 
         // check password
-        const isPasswordCorrect = await user.isPasswordCorrect(password);
-
-        // console.log("isPasswordCorrect: ", isPasswordCorrect);
+        const isPasswordCorrect = await user.isPasswordCorrect(password); 
 
         if (!isPasswordCorrect) {
             throw new ApiError(401, "Password is incorrect")
@@ -136,12 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
         // generate access token and refresh token
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
 
-        const loggedUser = await User.findById(user._id).select("-password -refreshToken");
-
-        // console.log("accessToken: ", accessToken._id);
-        // console.log("refreshToken: ", refreshToken._id);
-
-        console.log("loggedUser: ", loggedUser);
+        const loggedUser = await User.findById(user._id).select("-password -refreshToken"); 
 
         const options = {
             httpOnly: true,
@@ -170,8 +151,7 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 // logout user
-const userLogout = asyncHandler(async (req, res, next) => {
-    console.log("logOute: ", req.user)
+const userLogout = asyncHandler(async (req, res, next) => { 
     try {
         await User.findByIdAndUpdate(
             req.user._id,
@@ -211,14 +191,12 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
     try {
         // verify refresh token
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-        // console.log("decodedToken: ", decodedToken);
+ 
         // check refresh token is existed or not
         if (!decodedToken) {
             throw new ApiError(401, "Refresh token is expired!");
         }
-
-        console.log("decodedToken: ", decodedToken);
+ 
         // check user
         const user = await User.findById(decodedToken?._id);
 

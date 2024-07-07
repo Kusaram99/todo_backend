@@ -6,22 +6,9 @@ import { User } from "../models/user.model.js";
 
 
 // add todo to database
-const addTodo = asyncHandler(async (req, res) => {
-
-    // check todo values
-    // check user is available in database
-    // if not throw error
-    // if user is available then add todo to database
-    // check data saved or not 
-    // if not throw error
-    // return success message with todo data and status 200
+const addTodo = asyncHandler(async (req, res) => { 
     try {
-        const { title, textarea, userId } = req.body;
-
-        // console.log("body--: ", req.body)
-
-        // return res.send("todo added")
-
+        const { title, textarea, userId } = req.body; 
         // check todo's values
         if (!title?.trim() || !textarea?.trim()) throw new ApiError(401, "All fields are required");
 
@@ -41,24 +28,18 @@ const addTodo = asyncHandler(async (req, res) => {
         res.status(200).json(new ApiResponse(200, todo, "Todo added successfully"))
     }
     catch (error) {
-        // console.log("adding-error: ", error);
+        console.log("adding-error: ", error);
         throw new ApiError(401, error?.message || "Server Error")
     }
 })
 
 // delet todo 
-const deleteTodo = asyncHandler(async (req, res) => {
-    // check user is loged
-    // if no throw error
-    // If yes delete todo
-    // ṭhen return deleted todo data 
-    // as response
+const deleteTodo = asyncHandler(async (req, res) => { 
     const { _id } = req.params;
     try {
         // delete todo
         const result = await Todo.findByIdAndDelete(_id)
-        // if not deleted
-        console.log("Todo deleted successfully:- ", result)
+        // if not deleted 
         if (!result) {
             throw new ApiError(500, "Request failed!");
         }

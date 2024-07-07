@@ -13,6 +13,8 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(cors());
+
 // Use the JSON middleware to parse incoming JSON requests
 // The limit option restricts the size of the JSON payload to 16kb
 app.use(express.json({ limit: "5mb" }));
